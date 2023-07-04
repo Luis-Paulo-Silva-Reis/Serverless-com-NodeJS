@@ -1,0 +1,24 @@
+service: aws-node-http-api-project
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+functions:
+  sendResponse:
+    handler: api/index.sendResponse
+    events:
+      httpApi:
+      path: /api/results
+      method: post
+      request:
+        schemas:
+          application/json: ${file(./schemas/sendResponse.json)}
+
+  getResult:
+    handler: api/index.getResult
+    events:
+      httpApi:
+        path: /api/results/{id}
+        method: get
