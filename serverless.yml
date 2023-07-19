@@ -1,24 +1,48 @@
+---
 service: aws-node-http-api-project
 frameworkVersion: "3"
+params:
+  default:
+    dbName: serverless
+  dev:
+    connectionString: mongodb://localhost:27017/${self:params.default.dbName}
+    salt: 26c851a68f6662d1f3c8af739856c16f
+    jwtSecret: cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
+  prod:
 
 provider:
   name: aws
   runtime: nodejs18.x
+  environment:
+    MONGODB_CONNECTIONSTRING: ${param:connectionString}
+    MONGODB_DB_NAME: ${param:dbName}
+    JWT_SECRET: ${param:jwtSecret}
+    SALT: ${param:salt}
 
 functions:
   sendResponse:
     handler: api/index.sendResponse
     events:
-      httpApi:
-      path: /api/results
-      method: post
-      request:
-        schemas:
-          application/json: ${file(./schemas/sendResponse.json)}
-
+      - httpApi:
+          path: /api/results
+          method: post
+          request:
+            schemas:
+              application/json: ${file(./schemas/sendResponse.json)}
   getResult:
     handler: api/index.getResult
     events:
-      httpApi:
-        path: /api/results/{id}
-        method: get
+      - httpApi:
+          path: /api/results/{id}
+          method: get
+  login:
+    handler: api/index.login
+    events:
+      - httpApi:
+          path: /api/login
+          method: post
+          request:
+            schemas:
+              application/json: ${file(./schemas/login.json)}
+plugins:
+  - serverless-offline
